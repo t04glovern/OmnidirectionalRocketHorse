@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 1b7134386324c407b8679b46dcbc17c4
+timeCreated: 1495893532
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Gristled Font
+  fontNames:
+  - Gristled Font
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

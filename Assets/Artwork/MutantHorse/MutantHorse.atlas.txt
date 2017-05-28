@@ -1,0 +1,97 @@
+
+MutantHorse.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Body
+  rotate: true
+  xy: 2, 36
+  size: 211, 181
+  orig: 211, 181
+  offset: 0, 0
+  index: -1
+Eye-Left
+  rotate: false
+  xy: 185, 12
+  size: 50, 50
+  orig: 50, 50
+  offset: 0, 0
+  index: -1
+Eye-Pupel-Left
+  rotate: false
+  xy: 2, 2
+  size: 14, 15
+  orig: 14, 15
+  offset: 0, 0
+  index: -1
+Eye-Pupel-Right
+  rotate: false
+  xy: 2, 19
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+Eye-Right
+  rotate: false
+  xy: 237, 13
+  size: 49, 49
+  orig: 49, 49
+  offset: 0, 0
+  index: -1
+Fire
+  rotate: true
+  xy: 908, 158
+  size: 89, 108
+  orig: 89, 108
+  offset: 0, 0
+  index: -1
+Head
+  rotate: true
+  xy: 541, 53
+  size: 194, 143
+  orig: 194, 143
+  offset: 0, 0
+  index: -1
+Head-Bone
+  rotate: false
+  xy: 686, 11
+  size: 206, 87
+  orig: 206, 87
+  offset: 0, 0
+  index: -1
+Leg-01
+  rotate: false
+  xy: 369, 59
+  size: 170, 188
+  orig: 170, 188
+  offset: 0, 0
+  index: -1
+Leg-02
+  rotate: true
+  xy: 185, 64
+  size: 183, 182
+  orig: 183, 182
+  offset: 0, 0
+  index: -1
+Neck
+  rotate: true
+  xy: 686, 100
+  size: 147, 141
+  orig: 147, 141
+  offset: 0, 0
+  index: -1
+Rocket
+  rotate: true
+  xy: 894, 4
+  size: 104, 97
+  orig: 104, 97
+  offset: 0, 0
+  index: -1
+Tail
+  rotate: true
+  xy: 829, 110
+  size: 137, 77
+  orig: 137, 77
+  offset: 0, 0
+  index: -1

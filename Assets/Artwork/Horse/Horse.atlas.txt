@@ -1,0 +1,90 @@
+
+Horse.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Body
+  rotate: false
+  xy: 2, 94
+  size: 200, 160
+  orig: 200, 160
+  offset: 0, 0
+  index: -1
+Eye-Left
+  rotate: false
+  xy: 516, 73
+  size: 50, 50
+  orig: 50, 50
+  offset: 0, 0
+  index: -1
+Eye-Pupel-Left
+  rotate: false
+  xy: 2, 2
+  size: 14, 15
+  orig: 14, 15
+  offset: 0, 0
+  index: -1
+Eye-Pupel-Right
+  rotate: false
+  xy: 2, 19
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+Eye-Right
+  rotate: false
+  xy: 516, 22
+  size: 49, 49
+  orig: 49, 49
+  offset: 0, 0
+  index: -1
+Head
+  rotate: true
+  xy: 204, 106
+  size: 148, 191
+  orig: 148, 191
+  offset: 0, 0
+  index: -1
+Leg-Back-Left
+  rotate: true
+  xy: 397, 191
+  size: 63, 231
+  orig: 63, 231
+  offset: 0, 0
+  index: -1
+Leg-Back-Right
+  rotate: true
+  xy: 397, 125
+  size: 64, 229
+  orig: 64, 229
+  offset: 0, 0
+  index: -1
+Leg-Front-Left
+  rotate: true
+  xy: 630, 198
+  size: 56, 229
+  orig: 56, 229
+  offset: 0, 0
+  index: -1
+Leg-Front-Right
+  rotate: true
+  xy: 2, 36
+  size: 56, 229
+  orig: 56, 229
+  offset: 0, 0
+  index: -1
+Neck
+  rotate: true
+  xy: 861, 120
+  size: 134, 157
+  orig: 134, 157
+  offset: 0, 0
+  index: -1
+Tail
+  rotate: false
+  xy: 397, 10
+  size: 117, 113
+  orig: 117, 113
+  offset: 0, 0
+  index: -1
