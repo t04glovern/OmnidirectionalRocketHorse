@@ -35,7 +35,7 @@ using Spine;
 namespace Spine.Unity {
 	[ExecuteInEditMode, RequireComponent(typeof(CanvasRenderer), typeof(RectTransform)), DisallowMultipleComponent]
 	[AddComponentMenu("Spine/SkeletonGraphic (Unity UI Canvas)")]
-	public class SkeletonGraphic : MaskableGraphic, ISkeletonComponent, IAnimationStateComponent, ISkeletonAnimation {
+	public class SkeletonGraphic : MaskableGraphic, ISkeletonComponent, IAnimationStateComponent, ISkeletonAnimation, IHasSkeletonDataAsset {
 
 		#region Inspector
 		public SkeletonDataAsset skeletonDataAsset;
@@ -43,6 +43,7 @@ namespace Spine.Unity {
 
 		[SpineSkin(dataField:"skeletonDataAsset")]
 		public string initialSkinName = "default";
+		public bool initialFlipX, initialFlipY;
 
 		[SpineAnimation(dataField:"skeletonDataAsset")]
 		public string startingAnimation;
@@ -79,9 +80,16 @@ namespace Spine.Unity {
 							
 					}
 
-					skeleton.SetToSetupPose();
-					if (!string.IsNullOrEmpty(startingAnimation))
-						skeleton.PoseWithAnimation(startingAnimation, 0f, false);
+					// Only provide visual feedback to inspector changes in Unity Editor Edit mode.
+					if (!Application.isPlaying) {
+						skeleton.flipX = this.initialFlipX;
+						skeleton.flipY = this.initialFlipY;
+
+						skeleton.SetToSetupPose();
+						if (!string.IsNullOrEmpty(startingAnimation))
+							skeleton.PoseWithAnimation(startingAnimation, 0f, false);
+					}
+
 				}
 			} else {
 				if (skeletonDataAsset != null)
@@ -107,7 +115,7 @@ namespace Spine.Unity {
 		public static SkeletonGraphic AddSkeletonGraphicComponent (GameObject gameObject, SkeletonDataAsset skeletonDataAsset) {
 			var c = gameObject.AddComponent<SkeletonGraphic>();
 			if (skeletonDataAsset != null) {
-				c.skeletonDataAsset = skeletonDataAsset;
+				c.skeletonDataAsset = skeletonDataAsset;				
 				c.Initialize(false);
 			}
 			return c;
@@ -116,9 +124,18 @@ namespace Spine.Unity {
 
 		#region Internals
 		// This is used by the UI system to determine what to put in the MaterialPropertyBlock.
+		Texture overrideTexture;
+		public Texture OverrideTexture {
+			get { return overrideTexture; }
+			set {
+				overrideTexture = value;
+				canvasRenderer.SetTexture(this.mainTexture); // Refresh canvasRenderer's texture. Make sure it handles null.
+			}
+		}
 		public override Texture mainTexture {
 			get { 
 				// Fail loudly when incorrectly set up.
+				if (overrideTexture != null) return overrideTexture;
 				return skeletonDataAsset == null ? null : skeletonDataAsset.atlasAssets[0].materials[0].mainTexture;
 			}
 		}
@@ -191,6 +208,9 @@ namespace Spine.Unity {
 		public event UpdateBonesDelegate UpdateWorld;
 		public event UpdateBonesDelegate UpdateComplete;
 
+		/// <summary> Occurs after the vertex data populated every frame, before the vertices are pushed into the mesh.</summary>
+		public event Spine.Unity.MeshGeneratorDelegate OnPostProcessVertices;
+
 		public void Clear () {
 			skeleton = null;
 			canvasRenderer.Clear();
@@ -212,8 +232,13 @@ namespace Spine.Unity {
 				return;
 			}
 
-			this.skeleton = new Skeleton(skeletonData);
+			this.skeleton = new Skeleton(skeletonData) {
+				flipX = this.initialFlipX,
+				flipY = this.initialFlipY
+			};
+
 			meshBuffers = new DoubleBuffered<MeshRendererBuffers.SmartMesh>();
+			canvasRenderer.SetTexture(this.mainTexture); // Needed for overwriting initializations.
 
 			// Set the initial Skin and Animation
 			if (!string.IsNullOrEmpty(initialSkinName))
@@ -227,7 +252,7 @@ namespace Spine.Unity {
 					// Assume SkeletonAnimation is valid for skeletonData and skeleton. Checked above.
 					var animationObject = skeletonDataAsset.GetSkeletonData(false).FindAnimation(startingAnimation);
 					if (animationObject != null)
-						animationObject.Apply(skeleton, 0f, 0f, false, null, 1f, true, false);
+						animationObject.PoseSkeleton(skeleton, 0);
 				}
 				Update(0);
 			}
@@ -257,11 +282,13 @@ namespace Spine.Unity {
 			}
 
 			if (canvas != null) meshGenerator.ScaleVertexData(canvas.referencePixelsPerUnit);
+			if (OnPostProcessVertices != null) OnPostProcessVertices.Invoke(this.meshGenerator.Buffers);
 
 			var mesh = smartMesh.mesh;
 			meshGenerator.FillVertexData(mesh);
 			if (updateTriangles) meshGenerator.FillTrianglesSingle(mesh);
-			
+			meshGenerator.FillLateVertexData(mesh);
+
 			canvasRenderer.SetMesh(mesh);
 			smartMesh.instructionUsed.Set(currentInstructions);
 

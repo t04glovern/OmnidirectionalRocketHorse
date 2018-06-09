@@ -72,6 +72,14 @@ namespace Spine.Unity.Modules {
 		#endregion
 
 		#region Runtime Instantiation
+		/// <summary>Adds a SkeletonRenderSeparator and child SkeletonPartsRenderer GameObjects to a given SkeletonRenderer.</summary>
+		/// <returns>The to skeleton renderer.</returns>
+		/// <param name="skeletonRenderer">The target SkeletonRenderer or SkeletonAnimation.</param>
+		/// <param name="sortingLayerID">Sorting layer to be used for the parts renderers.</param>
+		/// <param name="extraPartsRenderers">Number of additional SkeletonPartsRenderers on top of the ones determined by counting the number of separator slots.</param>
+		/// <param name="sortingOrderIncrement">The integer to increment the sorting order per SkeletonPartsRenderer to separate them.</param>
+		/// <param name="baseSortingOrder">The sorting order value of the first SkeletonPartsRenderer.</param>
+		/// <param name="addMinimumPartsRenderers">If set to <c>true</c>, a minimum number of SkeletonPartsRenderer GameObjects (determined by separatorSlots.Count + 1) will be added.</param>
 		public static SkeletonRenderSeparator AddToSkeletonRenderer (SkeletonRenderer skeletonRenderer, int sortingLayerID = 0, int extraPartsRenderers = 0, int sortingOrderIncrement = DefaultSortingOrderIncrement, int baseSortingOrder = 0, bool addMinimumPartsRenderers = true) {
 			if (skeletonRenderer == null) {
 				Debug.Log("Tried to add SkeletonRenderSeparator to a null SkeletonRenderer reference.");
@@ -90,14 +98,33 @@ namespace Spine.Unity.Modules {
 			var componentRenderers = srs.partsRenderers;
 
 			for (int i = 0; i < count; i++) {
-				var smr = SkeletonPartsRenderer.NewPartsRendererGameObject(skeletonRendererTransform, i.ToString());
-				var mr = smr.MeshRenderer;
+				var spr = SkeletonPartsRenderer.NewPartsRendererGameObject(skeletonRendererTransform, i.ToString());
+				var mr = spr.MeshRenderer;
 				mr.sortingLayerID = sortingLayerID;
 				mr.sortingOrder = baseSortingOrder + (i * sortingOrderIncrement);
-				componentRenderers.Add(smr);
+				componentRenderers.Add(spr);
 			}
 
 			return srs;
+		}
+
+		/// <summary>Add a child SkeletonPartsRenderer GameObject to this SkeletonRenderSeparator.</summary>
+		public void AddPartsRenderer (int sortingOrderIncrement = DefaultSortingOrderIncrement) {
+			int sortingLayerID = 0;
+			int sortingOrder = 0;
+			if (partsRenderers.Count > 0) {
+				var previous = partsRenderers[partsRenderers.Count - 1];
+				var previousMeshRenderer = previous.MeshRenderer;
+				sortingLayerID = previousMeshRenderer.sortingLayerID;
+				sortingOrder = previousMeshRenderer.sortingOrder + sortingOrderIncrement;
+			}
+				
+			var spr = SkeletonPartsRenderer.NewPartsRendererGameObject(skeletonRenderer.transform, partsRenderers.Count.ToString());
+			partsRenderers.Add(spr);
+
+			var mr = spr.MeshRenderer;
+			mr.sortingLayerID = sortingLayerID;
+			mr.sortingOrder = sortingOrder;
 		}
 		#endregion
 
@@ -111,18 +138,13 @@ namespace Spine.Unity.Modules {
 			skeletonRenderer.GenerateMeshOverride += HandleRender;
 			#endif
 
-
-			#if UNITY_5_4_OR_NEWER
 			if (copyMeshRendererFlags) {
 				var lightProbeUsage = mainMeshRenderer.lightProbeUsage;
 				bool receiveShadows = mainMeshRenderer.receiveShadows;
-
-				#if UNITY_5_5_OR_NEWER
 				var reflectionProbeUsage = mainMeshRenderer.reflectionProbeUsage;
 				var shadowCastingMode = mainMeshRenderer.shadowCastingMode;
 				var motionVectorGenerationMode = mainMeshRenderer.motionVectorGenerationMode;
 				var probeAnchor = mainMeshRenderer.probeAnchor;
-				#endif
 
 				for (int i = 0; i < partsRenderers.Count; i++) {
 					var currentRenderer = partsRenderers[i];
@@ -131,31 +153,12 @@ namespace Spine.Unity.Modules {
 					var mr = currentRenderer.MeshRenderer;
 					mr.lightProbeUsage = lightProbeUsage;
 					mr.receiveShadows = receiveShadows;
-
-					#if UNITY_5_5_OR_NEWER
 					mr.reflectionProbeUsage = reflectionProbeUsage;
 					mr.shadowCastingMode = shadowCastingMode;
 					mr.motionVectorGenerationMode = motionVectorGenerationMode;
 					mr.probeAnchor = probeAnchor;
-					#endif
 				}
 			}
-			#else
-			if (copyMeshRendererFlags) {
-				var useLightProbes = mainMeshRenderer.useLightProbes;
-				bool receiveShadows = mainMeshRenderer.receiveShadows;
-
-				for (int i = 0; i < partsRenderers.Count; i++) {
-					var currentRenderer = partsRenderers[i];
-					if (currentRenderer == null) continue; // skip null items.
-
-					var mr = currentRenderer.MeshRenderer;
-					mr.useLightProbes = useLightProbes;
-					mr.receiveShadows = receiveShadows;
-				}
-			}
-			#endif
-
 		}
 
 		void OnDisable () {

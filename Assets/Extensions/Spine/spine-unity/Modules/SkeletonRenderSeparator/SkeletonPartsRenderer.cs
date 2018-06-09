@@ -112,11 +112,12 @@ namespace Spine.Unity.Modules {
 				meshGenerator.FillVertexData(mesh);
 				if (updateTriangles) {
 					meshGenerator.FillTriangles(mesh);
-					meshRenderer.sharedMaterials = buffers.GetUpdatedShaderdMaterialsArray();
+					meshRenderer.sharedMaterials = buffers.GetUpdatedSharedMaterialsArray();
 				} else if (buffers.MaterialsChangedInLastUpdate()) {
-					meshRenderer.sharedMaterials = buffers.GetUpdatedShaderdMaterialsArray();
+					meshRenderer.sharedMaterials = buffers.GetUpdatedSharedMaterialsArray();
 				}
 			}
+			meshGenerator.FillLateVertexData(mesh);
 
 			meshFilter.sharedMesh = mesh;
 			smartMesh.instructionUsed.Set(currentInstructions);

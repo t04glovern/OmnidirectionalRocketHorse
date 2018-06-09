@@ -680,7 +680,12 @@ public class SpineSpriteShaderGUI : ShaderGUI {
 
 		if (emission && !mixedValue) {
 			EditorGUI.BeginChangeCheck();
+
+#if UNITY_2018
+			_materialEditor.TexturePropertyWithHDRColor(_emissionText, _emissionMap, _emissionColor, true);
+#else
 			_materialEditor.TexturePropertyWithHDRColor(_emissionText, _emissionMap, _emissionColor, new ColorPickerHDRConfig(0, 1, 0.01010101f, 3), true);
+#endif
 			_materialEditor.FloatProperty(_emissionPower, _emissionPowerText.text);
 			dataChanged |= EditorGUI.EndChangeCheck();
 		}
@@ -714,9 +719,9 @@ public class SpineSpriteShaderGUI : ShaderGUI {
 		return dataChanged;
 	}
 
-	#endregion
+#endregion
 
-	#region Private Functions
+#region Private Functions
 
 	void RenderMeshInfoBox () {
 		var material = (Material)_materialEditor.target;
@@ -964,5 +969,5 @@ public class SpineSpriteShaderGUI : ShaderGUI {
 		return material.IsKeywordEnabled("_FIXED_NORMALS_VIEWSPACE_BACKFACE") || material.IsKeywordEnabled("_FIXED_NORMALS_MODELSPACE_BACKFACE");
 	}
 
-	#endregion
+#endregion
 }

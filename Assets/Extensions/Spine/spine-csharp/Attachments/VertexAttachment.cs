@@ -33,16 +33,26 @@ using System;
 namespace Spine {
 	/// <summary>>An attachment with vertices that are transformed by one or more bones and can be deformed by a slot's vertices.</summary> 
 	public class VertexAttachment : Attachment {
+		static int nextID = 0;
+		static readonly Object nextIdLock = new Object();
+
+		internal readonly int id;
 		internal int[] bones;
 		internal float[] vertices;
 		internal int worldVerticesLength;
 
+		/// <summary>Gets a unique ID for this attachment.</summary>
+		public int Id { get { return id; } }
 		public int[] Bones { get { return bones; } set { bones = value; } }
 		public float[] Vertices { get { return vertices; } set { vertices = value; } }
 		public int WorldVerticesLength { get { return worldVerticesLength; } set { worldVerticesLength = value; } }
 
-		public VertexAttachment (String name)
+		public VertexAttachment (string name)
 			: base(name) {
+
+			lock (VertexAttachment.nextIdLock) {
+				id = (VertexAttachment.nextID++ & 65535) << 11;
+			}
 		}
 
 		public void ComputeWorldVertices (Slot slot, float[] worldVertices) {
@@ -108,67 +118,6 @@ namespace Spine {
 					}
 					worldVertices[w] = wx;
 					worldVertices[w + 1] = wy;
-				}
-			}
-		}
-
-		public void ComputeUnityVertices (Slot slot, UnityEngine.Vector3[] worldVertices) {
-			ComputeUnityVertices(slot, 0, worldVerticesLength, worldVertices, 0);
-		}
-
-		public void ComputeUnityVertices (Slot slot, int start, int count, UnityEngine.Vector3[] worldVertices, int offset) {
-			count = offset + (count >> 1);
-			Skeleton skeleton = slot.bone.skeleton;
-			var deformArray = slot.attachmentVertices;
-			float[] vertices = this.vertices;
-			int[] bones = this.bones;
-			if (bones == null) {
-				if (deformArray.Count > 0) vertices = deformArray.Items;
-				Bone bone = slot.bone;
-				float x = bone.worldX, y = bone.worldY;
-				float a = bone.a, b = bone.b, c = bone.c, d = bone.d;
-				for (int vv = start, w = offset; w < count; vv += 2, w++) {
-					float vx = vertices[vv], vy = vertices[vv + 1];
-					worldVertices[w].x = vx * a + vy * b + x;
-					worldVertices[w].y = vx * c + vy * d + y;
-				}
-				return;
-			}
-			int v = 0, skip = 0;
-			for (int i = 0; i < start; i += 2) {
-				int n = bones[v];
-				v += n + 1;
-				skip += n;
-			}
-			var skeletonBones = skeleton.bones.Items;
-			if (deformArray.Count == 0) {
-				for (int w = offset, b = skip * 3; w < count; w++) {
-					float wx = 0, wy = 0;
-					int n = bones[v++];
-					n += v;
-					for (; v < n; v++, b += 3) {
-						Bone bone = skeletonBones[bones[v]];
-						float vx = vertices[b], vy = vertices[b + 1], weight = vertices[b + 2];
-						wx += (vx * bone.a + vy * bone.b + bone.worldX) * weight;
-						wy += (vx * bone.c + vy * bone.d + bone.worldY) * weight;
-					}
-					worldVertices[w].x = wx;
-					worldVertices[w].y = wy;
-				}
-			} else {
-				float[] deform = deformArray.Items;
-				for (int w = offset, b = skip * 3, f = skip << 1; w < count; w++) {
-					float wx = 0, wy = 0;
-					int n = bones[v++];
-					n += v;
-					for (; v < n; v++, b += 3, f += 2) {
-						Bone bone = skeletonBones[bones[v]];
-						float vx = vertices[b] + deform[f], vy = vertices[b + 1] + deform[f + 1], weight = vertices[b + 2];
-						wx += (vx * bone.a + vy * bone.b + bone.worldX) * weight;
-						wy += (vx * bone.c + vy * bone.d + bone.worldY) * weight;
-					}
-					worldVertices[w].x = wx;
-					worldVertices[w].y = wy;
 				}
 			}
 		}

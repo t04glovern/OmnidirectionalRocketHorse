@@ -98,7 +98,7 @@ namespace Spine.Unity {
 				return null;
 			}
 
-			// Support attachmentless/skinless SkeletonData.
+			// Disabled to support attachmentless/skinless SkeletonData.
 //			if (atlasAssets == null) {
 //				atlasAssets = new AtlasAsset[0];
 //				if (!quiet)
@@ -126,7 +126,7 @@ namespace Spine.Unity {
 			Atlas[] atlasArray = this.GetAtlasArray();
 
 			#if !SPINE_TK2D
-			attachmentLoader = new AtlasAttachmentLoader(atlasArray);
+			attachmentLoader = (atlasArray.Length == 0) ? (AttachmentLoader)new RegionlessAttachmentLoader() : (AttachmentLoader)new AtlasAttachmentLoader(atlasArray);
 			skeletonDataScale = scale;
 			#else
 			if (spriteCollection != null) {

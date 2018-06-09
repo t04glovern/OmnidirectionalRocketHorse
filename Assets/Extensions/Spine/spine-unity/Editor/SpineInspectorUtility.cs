@@ -86,13 +86,38 @@ namespace Spine.Unity.Editor {
 		#region SerializedProperty Helpers
 		public static SerializedProperty FindBaseOrSiblingProperty (this SerializedProperty property, string propertyName) {
 			if (string.IsNullOrEmpty(propertyName)) return null;
+
 			SerializedProperty relativeProperty = property.serializedObject.FindProperty(propertyName); // baseProperty
-			if (relativeProperty == null) { // If no baseProperty, find sibling property.
-				int nameLength = property.name.Length;
+
+			// If base property is not found, look for the sibling property.
+			if (relativeProperty == null) { 
 				string propertyPath = property.propertyPath;
-				propertyPath = propertyPath.Remove(propertyPath.Length - nameLength, nameLength) + propertyName;
-				relativeProperty = property.serializedObject.FindProperty(propertyPath);
+				int localPathLength = property.name.Length;
+
+				string newPropertyPath = propertyPath.Remove(propertyPath.Length - localPathLength, localPathLength) + propertyName;
+				relativeProperty = property.serializedObject.FindProperty(newPropertyPath);
+
+				// If a direct sibling property was not found, try to find the sibling of the array.
+				if (relativeProperty == null && property.isArray) {
+					int propertyPathLength = propertyPath.Length;
+
+					int dotCount = 0;
+					const int SiblingOfListDotCount = 3;
+					for (int i = 1; i < propertyPathLength; i++) {
+						if (propertyPath[propertyPathLength - i] == '.') {
+							dotCount++;
+							if (dotCount >= SiblingOfListDotCount) {
+								localPathLength = i - 1;
+								break;
+							}
+						}
+					}
+
+					newPropertyPath = propertyPath.Remove(propertyPath.Length - localPathLength, localPathLength) + propertyName;
+					relativeProperty = property.serializedObject.FindProperty(newPropertyPath);
+				}
 			}
+
 			return relativeProperty;
 		}
 		#endregion
@@ -132,7 +157,7 @@ namespace Spine.Unity.Editor {
 				get {
 					if (boxScopeStyle == null) {
 						boxScopeStyle = new GUIStyle(EditorStyles.helpBox);
-						var p = boxScopeStyle.padding;
+						RectOffset p = boxScopeStyle.padding; // RectOffset is a class
 						p.right += 6;
 						p.top += 1;
 						p.left += 3;
@@ -220,9 +245,9 @@ namespace Spine.Unity.Editor {
 		public static bool TargetsUseSameData (SerializedObject so) {
 			if (so.isEditingMultipleObjects) {
 				int n = so.targetObjects.Length;
-				var first = so.targetObjects[0] as ISkeletonComponent;
+				var first = so.targetObjects[0] as IHasSkeletonDataAsset;
 				for (int i = 1; i < n; i++) {
-					var sr = so.targetObjects[i] as ISkeletonComponent;
+					var sr = so.targetObjects[i] as IHasSkeletonDataAsset;
 					if (sr != null && sr.SkeletonDataAsset != first.SkeletonDataAsset)
 						return false;
 				}

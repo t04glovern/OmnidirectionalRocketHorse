@@ -173,16 +173,12 @@ namespace Spine {
 				d = ld;
 				worldX = x + skeleton.x;
 				worldY = y + skeleton.y;
-//				worldSignX = Math.Sign(scaleX);
-//				worldSignY = Math.Sign(scaleY);
 				return;
 			}
 
 			float pa = parent.a, pb = parent.b, pc = parent.c, pd = parent.d;
 			worldX = pa * x + pb * y + parent.worldX;
 			worldY = pc * x + pd * y + parent.worldY;
-//			worldSignX = parent.worldSignX * Math.Sign(scaleX);
-//			worldSignY = parent.worldSignY * Math.Sign(scaleY);
 
 			switch (data.transformMode) {
 			case TransformMode.Normal: {
@@ -246,14 +242,14 @@ namespace Spine {
 					float lb = MathUtils.CosDeg(90 + shearY) * scaleY;
 					float lc = MathUtils.SinDeg(shearX) * scaleX;
 					float ld = MathUtils.SinDeg(90 + shearY) * scaleY;
+					if (data.transformMode != TransformMode.NoScaleOrReflection? pa * pd - pb* pc< 0 : skeleton.flipX != skeleton.flipY) {
+						zb = -zb;
+						zd = -zd;
+					}
 					a = za * la + zb * lc;
 					b = za * lb + zb * ld;
 					c = zc * la + zd * lc;
-					d = zc * lb + zd * ld;
-					if (data.transformMode != TransformMode.NoScaleOrReflection ? pa * pd - pb * pc < 0 : skeleton.flipX != skeleton.flipY) {
-						b = -b;
-						d = -d;
-					}
+					d = zc * lb + zd * ld;					
 					return;
 				}
 			}
